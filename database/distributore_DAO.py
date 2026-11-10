@@ -39,3 +39,50 @@ class DistributoreDAO:
             cnx.close()
 
         return result
+
+    def prezzi_medi(self, mese):
+        print(mese)
+        conn = DBConnect.get_connection()
+        cursor = conn.cursor(dictionary=True)
+        query = """SELECT nome, AVG(prezzo_litro) as media FROM prezzo p 
+                    INNER JOIN distributore d ON p.id_distributore = d.id
+                    where month(data) = %s
+                    GROUP BY id_distributore """
+
+        cursor.execute(query, (mese,))
+        data = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return data
+
+    def get_prezzi_primi_7_giorni(mese):
+        conn = DBConnect.get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        query = """
+                SELECT prezzo_litro, id_distributore
+                FROM prezzo
+                WHERE YEAR (data) = 2026
+                  AND MONTH (data) = %s
+                  AND DAY (data) <= 7
+                ORDER BY data ASC, id_distributore ASC
+                """
+
+        cursor.execute(query, (mese,))
+        results = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+
+        dizionario_prezzi = {}
+
+        for riga in results:
+            id_dist = riga['id_distributore']
+            prezzo = riga['prezzo_litro']
+
+            if id_dist not in dizionario_prezzi:
+                dizionario_prezzi[id_dist] = []
+
+            dizionario_prezzi[id_dist].append(prezzo)
+
+        return dizionario_prezzi

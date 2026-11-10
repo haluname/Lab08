@@ -28,10 +28,11 @@ class Controller:
             self._view.lista_visualizzazione.controls.append(
                 ft.Text(f"Il prezzo medio nel mese selezionato è:")
             )
+            print(prezzo_medio)
             if prezzo_medio is not None:
                 for distributore_media in prezzo_medio:
                     self._view.lista_visualizzazione.controls.append(
-                        ft.Text(f"{distributore_media[0]}: {distributore_media[1]:.3f} €/litro")
+                        ft.Text(f"{distributore_media['nome']}: {distributore_media['media']:.3f} €/litro")
                     )
 
     def calcola_sequenza(self, e):
