@@ -38,14 +38,44 @@ class Model:
         self.__sequenza_ottima = []
         self.__costo_ottimo = -1
         prezzi_settimana = self.__get_prezzi_prima_settimana_mese(mese)
-        self.__ricorsione([], 1, None, 0, prezzi_settimana)
-
+        print(prezzi_settimana)
+        self.__sequenza_ottima = self.__ricorsione([], 0, None, None, 0, prezzi_settimana)
+        print(self.__sequenza_ottima)
         id_to_nome = {distributore.id: distributore.nome for distributore in self._distributori}
         sequenza_nomi = [f"Giorno {giorno}: {id_to_nome[i]}" for giorno, i in enumerate(self.__sequenza_ottima, start=1)]
         return sequenza_nomi, round(self.__costo_ottimo, 2)
 
-    def __ricorsione(self, sequenza_parziale, giorno, ultimo_distributore, costo_corrente, prezzi_settimana):
+    def __ricorsione(self, sequenza_parziale, giorno, ultimo_distributore, altro_distributore, costo_corrente, prezzi_settimana):
         """ Implementa la ricorsione """
+        if len(sequenza_parziale) == 7:
+            return sequenza_parziale
+        else:
+            if len(sequenza_parziale) == 0:
+                if prezzi_settimana[1][0] <= prezzi_settimana[2][0]:
+                    sequenza_parziale.append(1)
+                    self.__costo_ottimo += (prezzi_settimana[1][0] * 100)
+                    ultimo_distributore = 1
+                    altro_distributore = 2
+                else:
+                    sequenza_parziale.append(2)
+                    self.__costo_ottimo += (prezzi_settimana[2][0] * 100)
+                    ultimo_distributore = 2
+                    altro_distributore = 1
+            else:
+                print(f"Nuovo distributore: {prezzi_settimana[altro_distributore][giorno] * 100 + 5}")
+                print(f"Vecchio Distributore {prezzi_settimana[ultimo_distributore][giorno] * 100}")
+                if ((prezzi_settimana[altro_distributore][giorno]*100) + 5) < (prezzi_settimana[ultimo_distributore][giorno]*100):
+                    aus = ultimo_distributore
+                    ultimo_distributore = altro_distributore
+                    altro_distributore = aus
+                    sequenza_parziale.append(ultimo_distributore)
+                    self.__costo_ottimo += (prezzi_settimana[ultimo_distributore][giorno] * 100) + 5
+                else:
+                    sequenza_parziale.append(ultimo_distributore)
+                    self.__costo_ottimo += (prezzi_settimana[ultimo_distributore][giorno] * 100)
+
+            return self.__ricorsione(sequenza_parziale, giorno+1, ultimo_distributore, altro_distributore, self.__costo_ottimo, prezzi_settimana)
+
 
 
     def __get_prezzi_prima_settimana_mese(self, mese: int):
